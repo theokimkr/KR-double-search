@@ -305,30 +305,30 @@
         });
 
         // 빈 입력창 흔들림(Shake) 피드백 함수
-        function triggerShakeFeedback() {
-          wrapper.classList.remove('animate-shake');
-          void wrapper.offsetWidth;
-          wrapper.classList.add('animate-shake');
-          input.focus();
-        }
-
-        // 검색 폼 제출 처리 (새 창 1개만 열기 + 빈 값 방지)
+        // 검색 폼 제출 처리 (노션 iframe 환경에서도 새 창 1개만 열리도록 기본 form 제출 차단 후 단일 링크 클릭)
         form.addEventListener('submit', function (event) {
+          // 노션 iframe 샌드박스에서 form target="_blank"가 중복 팝업을 유발하므로 기본 제출을 항상 차단
+          event.preventDefault();
+          event.stopPropagation();
+
           const query = input.value.trim();
 
-          // 검색어가 비어있으면 제출을 막고 흔들림 피드백 표시
+          // 검색어가 비어있으면 흔들림 피드백 표시
           if (!query) {
-            event.preventDefault();
             triggerShakeFeedback();
             return;
           }
 
-          // 앞뒤 공백을 정리한 검색어를 입력값에 반영
-          input.value = query;
+          const targetUrl = config.searchBaseUrl + encodeURIComponent(query);
 
-          // JavaScript의 window.open()과 HTML 폼 기본 제출(target="_blank")이
-          // 중복 실행되어 창이 2개 열리는 현상을 방지하기 위해 HTML 기본 폼 제출만 사용합니다.
-          // (노션 iframe 환경에서도 사용자 클릭/엔터 제스처로 안전하게 새 탭 1개만 열립니다)
+          // 임시 <a> 태그를 생성해 단일 클릭 이벤트를 발생시켜 노션 iframe에서도 창이 1개만 열리도록 처리
+          const link = document.createElement('a');
+          link.href = targetUrl;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
         });
 
         // 초기 UI 상태 설정
