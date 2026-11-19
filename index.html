@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Notion Google & Naver Quick Search Widget</title>
+  <title>Notion Google, Naver & YouTube Quick Search Widget</title>
   <!-- Tailwind CSS 로드 -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts (Inter & Noto Sans KR) -->
@@ -219,6 +219,72 @@
         </button>
       </div>
     </form>
+
+    <!-- 3. 유튜브(YouTube) 빠른 검색창 -->
+    <form
+      id="youtubeSearchForm"
+      action="https://www.youtube.com/results"
+      method="get"
+      target="_blank"
+      rel="noopener noreferrer"
+      novalidate
+      class="relative group"
+    >
+      <div
+        id="youtubeSearchBarWrapper"
+        class="flex items-center w-full h-11 sm:h-12 px-3.5 sm:px-4 rounded-full bg-white dark:bg-notion-darkSurface border border-notion-lightBorder dark:border-notion-darkBorder shadow-[0_1px_4px_rgba(0,0,0,0.04)] dark:shadow-[0_1px_6px_rgba(0,0,0,0.25)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:hover:border-neutral-600 focus-within:border-[#FF0000]/60 dark:focus-within:border-[#FF0000]/60 focus-within:shadow-[0_2px_10px_rgba(255,0,0,0.12)] transition-all duration-200"
+      >
+        <!-- 유튜브 브랜드 공식 플레이 로고 SVG -->
+        <div class="flex-shrink-0 mr-3 flex items-center justify-center" aria-hidden="true">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z" fill="#FF0000"/>
+            <path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#FFFFFF"/>
+          </svg>
+        </div>
+
+        <!-- 유튜브 검색어 입력 필드 -->
+        <input
+          id="youtubeSearchInput"
+          name="search_query"
+          type="search"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="YouTube 검색"
+          aria-label="YouTube 검색어 입력"
+          class="w-full bg-transparent text-sm sm:text-[15px] text-neutral-800 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none"
+        />
+
+        <!-- 유튜브 입력 텍스트 초기화 'X' 클리어 버튼 -->
+        <button
+          id="youtubeClearBtn"
+          type="button"
+          aria-label="YouTube 검색어 지우기"
+          title="지우기"
+          class="hidden flex-shrink-0 p-1 mr-1 rounded-full text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-150 focus:outline-none"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+
+        <!-- 구분선 -->
+        <div class="h-4 w-[1px] bg-neutral-200 dark:bg-neutral-700 mx-1.5 flex-shrink-0"></div>
+
+        <!-- 유튜브 검색 실행 버튼 -->
+        <button
+          id="youtubeSubmitBtn"
+          type="submit"
+          aria-label="새 창에서 YouTube 검색"
+          title="새 창에서 YouTube 검색"
+          class="flex-shrink-0 p-1.5 rounded-full text-neutral-500 hover:text-[#FF0000] dark:text-neutral-400 dark:hover:text-[#FF0000] hover:bg-[#FF0000]/10 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/40"
+        >
+          <svg class="w-4 h-4 sm:w-[18px] sm:h-[18px]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path stroke-linecap="round" d="M20 20l-3.5-3.5"></path>
+          </svg>
+        </button>
+      </div>
+    </form>
   </main>
 
   <script>
@@ -305,6 +371,13 @@
         });
 
         // 빈 입력창 흔들림(Shake) 피드백 함수
+        function triggerShakeFeedback() {
+          wrapper.classList.remove('animate-shake');
+          void wrapper.offsetWidth;
+          wrapper.classList.add('animate-shake');
+          input.focus();
+        }
+
         // 검색 폼 제출 처리 (노션 iframe 환경에서도 새 창 1개만 열리도록 기본 form 제출 차단 후 단일 링크 클릭)
         form.addEventListener('submit', function (event) {
           // 노션 iframe 샌드박스에서 form target="_blank"가 중복 팝업을 유발하므로 기본 제출을 항상 차단
@@ -355,6 +428,16 @@
         clearBtnId: 'naverClearBtn',
         shortcutHintId: null,
         searchBaseUrl: 'https://search.naver.com/search.naver?query='
+      });
+
+      // 유튜브 검색창 설정
+      setupSearchWidget({
+        formId: 'youtubeSearchForm',
+        wrapperId: 'youtubeSearchBarWrapper',
+        inputId: 'youtubeSearchInput',
+        clearBtnId: 'youtubeClearBtn',
+        shortcutHintId: null,
+        searchBaseUrl: 'https://www.youtube.com/results?search_query='
       });
 
       // 3. 단축키 '/' 입력 시 첫 번째(구글) 검색창 자동 포커스
